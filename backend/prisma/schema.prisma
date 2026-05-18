@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  }
+
+// Representa a Doca física no armazém
+model Dock {
+  id        String   @id @default(uuid())
+  code      String   @unique // Ex: DOCA-01
+  status    Status   @default(AVAILABLE)
+  
+  // Relacionamento (Uma doca tem no máximo uma carga ativa)
+  cargo     Cargo?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Representa a Mercadoria/Carga
+model Cargo {
+  id          String   @id @default(uuid())
+  description String
+  weight      Float
+  
+  // Regra de Negócio Forte: Unique garante que a doca não receba duas cargas no banco
+  dockId      String?  @unique
+  dock        Dock?    @relation(fields: [dockId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Status {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
